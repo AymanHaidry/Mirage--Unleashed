@@ -7,7 +7,7 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
   const addContact = async () => {
     if (!newContact.trim()) return;
     try {
-      const res = await axios.post("http://localhost:5000/addContact", {
+      const res = await axios.post("https://mirage-server-concordia.onrender.com/addContact", {
         owner: user.username,
         contact: newContact,
       });
@@ -42,4 +42,5 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
 }
 
 export default Sidebar;
+
 
