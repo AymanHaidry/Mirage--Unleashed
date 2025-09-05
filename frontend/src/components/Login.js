@@ -11,11 +11,11 @@ function Login({ setUser, setContacts }) {
 
     try {
       if (isRegister) {
-        await axios.post("http://localhost:5000/register", { username, password });
+        await axios.post("https://mirage-server-concordia.onrender.com/register", { username, password });
         alert("✅ Registered! Now log in.");
         setIsRegister(false);
       } else {
-        const res = await axios.post("http://localhost:5000/login", { username, password });
+        const res = await axios.post("https://mirage-server-concordia.onrender.com/login", { username, password });
         setUser({ username });
         setContacts(res.data.contacts || []);
       }
@@ -51,6 +51,7 @@ function Login({ setUser, setContacts }) {
 }
 
 export default Login;
+
 
 
 
