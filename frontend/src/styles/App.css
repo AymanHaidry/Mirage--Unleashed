@@ -1,0 +1,167 @@
+:root {
+  --primary: #075e54;
+  --secondary: #128c7e;
+  --light: #dcf8c6;
+  --dark: #333;
+  --muted: #999;
+  --background: #ece5dd;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--background);
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 25%;
+  background: white;
+  border-right: 1px solid var(--muted);
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--muted);
+}
+
+.sidebar li.active {
+  background: var(--light);
+}
+
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  background: var(--primary);
+  color: white;
+  padding: 15px;
+  font-weight: bold;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #f0f0f0;
+}
+
+.message {
+  margin: 5px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  max-width: 70%;
+  display: inline-block;
+}
+
+.sent {
+  background: var(--light);
+  align-self: flex-end;
+}
+
+.received {
+  background: white;
+  align-self: flex-start;
+}
+
+.timestamp {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+  text-align: right;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid var(--muted);
+  background: white;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--muted);
+  border-radius: 5px;
+}
+
+.chat-input button {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-left: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 150px;
+}
+
+.login-container input {
+  margin: 8px;
+  padding: 10px;
+  width: 200px;
+}
+
+.login-container button {
+  padding: 10px 20px;
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-link {
+  margin-top: 10px;
+  cursor: pointer;
+  color: var(--primary);
+}
+.add-contact {
+  display: flex;
+  margin-top: 10px;
+}
+
+.add-contact input {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+}
+
+.add-contact button {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  margin-left: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
