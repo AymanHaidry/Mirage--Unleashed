@@ -1,87 +1,72 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const cors = require("cors");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
-let users = []; // { username, password, socketId, contacts: [] }
-
-app.post("/register", (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password required" });
-  }
-
-  if (users.find((u) => u.username === username)) {
-    return res.status(400).json({ error: "User already exists" });
-  }
-
-  users.push({ username, password, socketId: null, contacts: [] });
-  return res.json({ success: true });
-});
-
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find((u) => u.username === username && u.password === password);
-  if (!user) {
-    return res.status(400).json({ error: "Invalid username or password" });
-  }
-  res.json({ success: true, contacts: user.contacts });
-});
-
-app.post("/addContact", (req, res) => {
-  const { owner, contact } = req.body;
-  const ownerUser = users.find((u) => u.username === owner);
-  const contactUser = users.find((u) => u.username === contact);
-
-  if (!ownerUser || !contactUser) {
-    return res.status(400).json({ error: "Invalid users" });
-  }
-
-  if (!ownerUser.contacts.includes(contact)) {
-    ownerUser.contacts.push(contact);
-  }
-
-  return res.json({ success: true, contacts: ownerUser.contacts });
-});
-
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+let users = {}; // { username: socket.id }
 
 io.on("connection", (socket) => {
-  console.log("✅ New client connected:", socket.id);
+  console.log("New client connected:", socket.id);
 
+  // user registers
   socket.on("registerSocket", (username) => {
-    const user = users.find((u) => u.username === username);
-    if (user) {
-      user.socketId = socket.id;
-      io.emit("updateStatus", { username, online: true });
+    users[username] = socket.id;
+    console.log(`${username} registered with socket ${socket.id}`);
+  });
+
+  // call user
+  socket.on("callUser", ({ from, to, offer, isVideo }) => {
+    const targetSocket = users[to];
+    if (targetSocket) {
+      io.to(targetSocket).emit("incomingCall", { from, offer, isVideo });
     }
   });
 
-  socket.on("sendMessage", ({ from, to, text }) => {
-    const recipient = users.find((u) => u.username === to);
-    if (recipient?.socketId) {
-      io.to(recipient.socketId).emit("receiveMessage", { from, text, time: new Date() });
+  // answer call
+  socket.on("answerCall", ({ to, answer }) => {
+    const targetSocket = users[to];
+    if (targetSocket) {
+      io.to(targetSocket).emit("callAnswered", { answer });
+    }
+  });
+
+  // reject call
+  socket.on("rejectCall", ({ to }) => {
+    const targetSocket = users[to];
+    if (targetSocket) {
+      io.to(targetSocket).emit("callRejected");
+    }
+  });
+
+  // ICE candidates
+  socket.on("iceCandidate", ({ to, candidate }) => {
+    const targetSocket = users[to];
+    if (targetSocket) {
+      io.to(targetSocket).emit("iceCandidate", { candidate });
+    }
+  });
+
+  // end call
+  socket.on("endCall", ({ to }) => {
+    const targetSocket = users[to];
+    if (targetSocket) {
+      io.to(targetSocket).emit("callEnded");
     }
   });
 
   socket.on("disconnect", () => {
-    const user = users.find((u) => u.socketId === socket.id);
-    if (user) {
-      user.socketId = null;
-      io.emit("updateStatus", { username: user.username, online: false });
+    for (const [username, id] of Object.entries(users)) {
+      if (id === socket.id) delete users[username];
     }
-    console.log("❌ Client disconnected:", socket.id);
+    console.log("Client disconnected:", socket.id);
   });
 });
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀🚀 Backend running on port ${PORT}`));
-
-
-
-
+server.listen(5000, () => console.log("🚀 Server running on port 5000"));
