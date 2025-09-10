@@ -60,15 +60,14 @@ body {
   background: #ededed;
 }
 
+/* Chat window */
 .chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   background: url("/assets/chat-bg.jpeg") repeat;
   background-size: cover;
 }
-
-.login-container {
-  background: url("/assets/login-bg.jpeg") center/cover no-repeat;
-}
-
 
 .chat-header {
   background: var(--primary);
@@ -157,6 +156,15 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
+/* Login page */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: url("/assets/login-bg.jpeg") center/cover no-repeat;
+}
 
 .login-box {
   background: rgba(255, 255, 255, 0.9);
@@ -203,6 +211,8 @@ body {
     height: 100%;
   }
 }
+
+/* Extra chat bubble refinements */
 .chat-bubble {
   padding: 10px 15px;
   border-radius: 20px;
@@ -223,6 +233,7 @@ body {
   border-bottom-left-radius: 5px;
 }
 
+/* Call popups */
 .incoming-call {
   position: fixed;
   bottom: 20px;
@@ -253,7 +264,3 @@ body {
   border-radius: 15px;
   background: black;
 }
-
-
-
-
