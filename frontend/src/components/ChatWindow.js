@@ -5,7 +5,6 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
   const [statuses, setStatuses] = useState({});
   const messagesEndRef = useRef(null);
 
-  // Scroll to bottom when messages update
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -58,6 +57,10 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
     if (e.key === "Enter") sendMessage();
   };
 
+  const handleAttachment = () => {
+    document.getElementById("fileInput").click();
+  };
+
   if (!selectedUser) {
     return <div className="chat-window">Select a contact to start chatting</div>;
   }
@@ -73,6 +76,10 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
         <span>
           {selectedUser} ({statuses[selectedUser] ? "🟢 Online" : "⚪ Offline"})
         </span>
+        <div className="chat-actions">
+          <button title="Voice Call">📞</button>
+          <button title="Video Call">🎥</button>
+        </div>
       </div>
 
       <div className="chat-messages">
@@ -91,6 +98,13 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
       </div>
 
       <div className="chat-input">
+        <button onClick={handleAttachment}>📎</button>
+        <input
+          id="fileInput"
+          type="file"
+          style={{ display: "none" }}
+          onChange={(e) => alert(`File selected: ${e.target.files[0].name}`)}
+        />
         <input
           type="text"
           value={input}
@@ -105,6 +119,4 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
 }
 
 export default ChatWindow;
-
-
 
