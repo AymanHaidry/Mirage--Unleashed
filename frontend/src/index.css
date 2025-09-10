@@ -11,11 +11,14 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-chat-window {
+
+/* Chat background */
+.chat-window {
   background: url("/assets/chat-bg.jpeg") repeat;
   background-size: cover;
 }
 
+/* Login background */
 .login-container {
   background: url("/assets/login-bg.jpeg") center/cover no-repeat;
 }
