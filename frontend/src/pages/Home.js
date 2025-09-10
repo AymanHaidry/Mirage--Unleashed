@@ -9,7 +9,7 @@ function Home({ user }) {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await axios.get(const res = await axios.get("http://localhost:5000/users");
+      const res = await axios.get(const res = await axios.get("https://mirage-server-concordia.onrender.com/users");
 ");
       setContacts(res.data.filter((u) => u !== user));
     };
@@ -31,6 +31,7 @@ function Home({ user }) {
 }
 
 export default Home;
+
 
 
 
