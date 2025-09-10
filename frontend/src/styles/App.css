@@ -1,5 +1,5 @@
 :root {
-  --primary: #ffe6ff;
+  --primary: #075e54;
   --secondary: #128c7e;
   --light: #dcf8c6;
   --dark: #333;
@@ -225,6 +225,7 @@ body {
     padding: 8px;
   }
 }
+
 
 
 
