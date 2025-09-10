@@ -164,4 +164,43 @@ body {
   border-radius: 5px;
   cursor: pointer;
 }
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Sidebar + Chat split for desktop */
+.sidebar {
+  width: 25%;
+  border-right: 1px solid var(--muted);
+  overflow-y: auto;
+}
+
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ✅ Mobile screens */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: 200px; /* small top section */
+    border-right: none;
+    border-bottom: 1px solid var(--muted);
+  }
+
+  .chat-window {
+    flex: 1;
+    height: calc(100vh - 200px);
+  }
+}
+
+
 
