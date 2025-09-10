@@ -65,7 +65,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: url("/assets/chat-bg.jpeg") repeat; /* doodle background */
+  background: url("background-image: url("/assets/chat-bg.jpeg");
+") repeat; /* doodle background */
   background-size: cover;
 }
 
@@ -261,5 +262,6 @@ body {
   border-radius: 15px;
   background: black;
 }
+
 
 
