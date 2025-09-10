@@ -1,38 +1,22 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React from "react";
 
-function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
-  const [newContact, setNewContact] = useState("");
-
-  const addContact = async () => {
-    if (!newContact.trim()) return;
-    try {
-      const res = await axios.post("https://mirage-server-concordia.onrender.com/addContact", {
-        owner: user.username,
-        contact: newContact,
-      });
-      setContacts(res.data.contacts);
-      setNewContact("");
-    } catch (err) {
-      alert(err.response?.data?.error || "Failed to add contact");
-    }
-  };
-
+function Sidebar({ user, contacts, setSelectedUser, selectedUser, onLogout }) {
   return (
     <div className="sidebar">
-      <h3>Contacts</h3>
-      <div className="add-contact">
-        <input
-          type="text"
-          placeholder="Add contact"
-          value={newContact}
-          onChange={(e) => setNewContact(e.target.value)}
-        />
-        <button onClick={addContact}>+</button>
+      <div className="sidebar-header">
+        <h2>🌌 Mirage</h2>
+        <span className="username">@{user.username}</span>
+        <button className="logout-btn" onClick={onLogout}>Logout</button>
       </div>
+
+      <h3>Contacts</h3>
       <ul>
         {contacts.map((c, i) => (
-          <li key={i} onClick={() => setSelectedUser(c)}>
+          <li
+            key={i}
+            className={selectedUser === c ? "active" : ""}
+            onClick={() => setSelectedUser(c)}
+          >
             {c}
           </li>
         ))}
@@ -42,5 +26,4 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
 }
 
 export default Sidebar;
-
 
