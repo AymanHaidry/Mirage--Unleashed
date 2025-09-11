@@ -13,11 +13,11 @@ code {
 }
 
 .chat-window {
-  background: url("/assets/chat-bg.jpeg") repeat;
+  background: url("frontend/public/assets/login-bg.jpeg") repeat;
   background-size: cover;
 }
 
 .login-container {
-  background: url("/assets/login-bg.jpeg") center/cover no-repeat;
+  background: url("frontend/public/assets/chat-bg.jpeg") center/cover no-repeat;
 }
 
