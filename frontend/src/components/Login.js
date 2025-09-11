@@ -12,11 +12,17 @@ function Login({ setUser, setContacts }) {
 
     try {
       if (isRegister) {
-        await axios.post("https://mirage-server-concordia.onrender.com/register", { username, password });
+        await axios.post(
+          "https://mirage-server-concordia.onrender.com/register",
+          { username, password }
+        );
         alert("✅ Registered! Now log in.");
         setIsRegister(false);
       } else {
-        const res = await axios.post("https://mirage-server-concordia.onrender.com/login", { username, password });
+        const res = await axios.post(
+          "https://mirage-server-concordia.onrender.com/login",
+          { username, password }
+        );
         setUser({ username });
         setContacts(res.data.contacts || []);
       }
@@ -26,32 +32,59 @@ function Login({ setUser, setContacts }) {
   };
 
   return (
-    <div className="login-container">
-      <h2>{isRegister ? "Register" : "Login"}</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleSubmit}>{isRegister ? "Register" : "Login"}</button>
-      <p
-        style={{ cursor: "pointer", color: "blue" }}
-        onClick={() => setIsRegister(!isRegister)}
+    <div
+      className="login-container"
+      style={{
+        backgroundImage: `url(${loginBg})`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "rgba(0,0,0,0.5)",
+          padding: "2rem",
+          borderRadius: "10px",
+          color: "white",
+        }}
       >
-        {isRegister ? "Already have an account? Login" : "No account? Register"}
-      </p>
+        <h2>{isRegister ? "Register" : "Login"}</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button onClick={handleSubmit}>
+          {isRegister ? "Register" : "Login"}
+        </button>
+        <p
+          style={{ cursor: "pointer", color: "lightblue" }}
+          onClick={() => setIsRegister(!isRegister)}
+        >
+          {isRegister
+            ? "Already have an account? Login"
+            : "No account? Register"}
+        </p>
+      </div>
     </div>
   );
 }
 
 export default Login;
+
+
 
 
 
