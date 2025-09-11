@@ -1,4 +1,22 @@
 import chatBg from "../assets/chat-bg.jpeg";
+
+function ChatWindow(...) {
+  return (
+    <div
+      className="chat-window"
+      style={{
+        backgroundImage: `url(${chatBg})`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        height: "100vh",
+      }}
+    >
+      {/* Your chat UI here */}
+    </div>
+  );
+}
+
 import React, { useState, useEffect, useRef } from "react";
 import { createPeerConnection } from "../utils/webrtc";
 
@@ -236,6 +254,7 @@ function ChatWindow({ socket, user, selectedUser }) {
 }
 
 export default ChatWindow;
+
 
 
 
