@@ -2,26 +2,6 @@ import chatBg from "./assets/chat-bg.jpeg";
 import loginBg from "./assets/login-bg.jpeg";
 import "./App.css";
 
-function App() {
-  return (
-    <div>
-      <div
-        className="chat-window"
-        style={{ backgroundImage: `url(${chatBg})`, backgroundSize: "cover" }}
-      >
-        <h1>Chat Page</h1>
-      </div>
-
-      <div
-        className="login-container"
-        style={{ backgroundImage: `url(${loginBg})`, backgroundSize: "cover" }}
-      >
-        <h1>Login Page</h1>
-      </div>
-    </div>
-  );
-}
-
 export default App;
 
 import React, { useState, useEffect } from "react";
