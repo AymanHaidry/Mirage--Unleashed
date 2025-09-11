@@ -1,3 +1,4 @@
+import loginBg from "../assets/login-bg.jpeg";
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -51,6 +52,7 @@ function Login({ setUser, setContacts }) {
 }
 
 export default Login;
+
 
 
 
