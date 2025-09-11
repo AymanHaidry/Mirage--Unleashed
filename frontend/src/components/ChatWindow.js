@@ -1,3 +1,4 @@
+import chatBg from "../assets/chat-bg.jpeg";
 import React, { useState, useEffect, useRef } from "react";
 import { createPeerConnection } from "../utils/webrtc";
 
@@ -235,5 +236,6 @@ function ChatWindow({ socket, user, selectedUser }) {
 }
 
 export default ChatWindow;
+
 
 
