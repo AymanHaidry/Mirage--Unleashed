@@ -60,13 +60,24 @@ body {
   background: #ededed;
 }
 
-/* Chat window */
+/* App.css */
+
 .chat-window {
-  flex: 1;
+  width: 100%;
+  height: 100vh; /* full screen */
   display: flex;
-  flex-direction: column;
-  background: url("/assets/chat-bg.jpeg") repeat;
-  background-size: cover;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.login-container {
+  width: 100%;
+  height: 100vh; /* full screen */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 .chat-header {
@@ -156,15 +167,7 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Login page */
-.login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: url("/assets/login-bg.jpeg") center/cover no-repeat;
-}
+
 
 .login-box {
   background: rgba(255, 255, 255, 0.9);
@@ -264,3 +267,4 @@ body {
   border-radius: 15px;
   background: black;
 }
+
