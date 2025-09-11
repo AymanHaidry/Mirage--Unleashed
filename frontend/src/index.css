@@ -12,13 +12,12 @@ code {
     monospace;
 }
 
-/* ✅ FIXED background paths */
 .chat-window {
-  background: url(/assets/chat-bg.jpeg) repeat;
+  background: url("/assets/chat-bg.jpeg") repeat;
   background-size: cover;
 }
 
 .login-container {
-  background: url(/assets/login-bg.jpeg) center/cover no-repeat;
+  background: url("/assets/login-bg.jpeg") center/cover no-repeat;
 }
 
