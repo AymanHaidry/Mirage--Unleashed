@@ -7,57 +7,62 @@ import "./styles/App.css";
 
 function App() {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
   });
 
   const [contacts, setContacts] = useState(() => {
-    const saved = localStorage.getItem("contacts");
-    return saved ? JSON.parse(saved) : [];
+    const savedContacts = localStorage.getItem("contacts");
+    return savedContacts ? JSON.parse(savedContacts) : [];
   });
 
+  // Structure: { "Alice": [{sender, text, time}, ...], "Bob": [...] }
   const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem("messages");
-    return saved ? JSON.parse(saved) : {};
+    const savedMessages = localStorage.getItem("messages");
+    return savedMessages ? JSON.parse(savedMessages) : {};
   });
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  useEffect(() => {
-    if (user) localStorage.setItem("user", JSON.stringify(user));
-  }, [user]);
-
+  // Save user, contacts, messages to localStorage
+  useEffect(() => { if (user) localStorage.setItem("user", JSON.stringify(user)); }, [user]);
   useEffect(() => localStorage.setItem("contacts", JSON.stringify(contacts)), [contacts]);
   useEffect(() => localStorage.setItem("messages", JSON.stringify(messages)), [messages]);
 
+  // Resize listener
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Register socket
   useEffect(() => {
     if (user) socket.emit("registerSocket", user.username);
   }, [user]);
 
-  const sendMessage = (text) => {
-    if (!text.trim() || !selectedUser) return;
+  // Listen for incoming messages
+  useEffect(() => {
+    if (!user) return;
 
-    setMessages(prev => ({
-      ...prev,
-      [selectedUser]: [
-        ...(prev[selectedUser] || []),
-        { sender: "me", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-      ]
-    }));
-  };
+    socket.on("receiveMessage", ({ from, text }) => {
+      setMessages(prev => ({
+        ...prev,
+        [from]: [
+          ...(prev[from] || []),
+          { sender: from, text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+        ]
+      }));
+    });
+
+    return () => socket.off("receiveMessage");
+  }, [user]);
 
   if (!user) return <Login setUser={setUser} setContacts={setContacts} />;
 
   return (
     <div className="app-container">
-      {/* Sidebar */}
       {(!isMobile || !selectedUser) && (
         <Sidebar
           user={user}
@@ -68,12 +73,33 @@ function App() {
         />
       )}
 
-      {/* Chat Window */}
       {(!isMobile || selectedUser) && (
         <ChatWindow
+          socket={socket}
+          user={user}
           selectedUser={selectedUser}
+          onBack={() => setSelectedUser(null)}
+          isMobile={isMobile}
           messages={messages[selectedUser] || []}
-          sendMessage={sendMessage}
+          sendMessage={(text) => {
+            if (!text.trim() || !selectedUser) return;
+
+            // Add locally
+            setMessages(prev => ({
+              ...prev,
+              [selectedUser]: [
+                ...(prev[selectedUser] || []),
+                { sender: "me", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+              ]
+            }));
+
+            // Emit to server
+            socket.emit("sendMessage", {
+              to: selectedUser,
+              from: user.username,
+              text
+            });
+          }}
         />
       )}
     </div>
