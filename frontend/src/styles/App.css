@@ -247,10 +247,7 @@ body {
   align-items: center;
   justify-content: center; /* vertically center */
   height: 100vh;
- background-image: url('/chat-bg.jpeg'); /* ✅ correct */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+
 }
 
 .login-card {
@@ -336,6 +333,7 @@ body {
   background: var(--muted);
   border-radius: 3px;
 }
+
 
 
 
