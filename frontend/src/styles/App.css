@@ -247,7 +247,7 @@ body {
   align-items: center;
   justify-content: center; /* vertically center */
   height: 100vh;
-  background-image: url('/chat-bg.jpeg'); /* updated path */
+  background-image: url('frontend/public/chat-bg.jpeg'); /* updated path */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -336,4 +336,5 @@ body {
   background: var(--muted);
   border-radius: 3px;
 }
+
 
