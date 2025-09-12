@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import "../styles/App.css"; // your main CSS
 
 function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
   const [newContact, setNewContact] = useState("");
@@ -7,10 +8,10 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
   const addContact = async () => {
     if (!newContact.trim()) return;
     try {
-      const res = await axios.post("https://mirage-server-concordia.onrender.com/addContact", {
-        owner: user.username,
-        contact: newContact,
-      });
+      const res = await axios.post(
+        "https://mirage-server-concordia.onrender.com/addContact",
+        { owner: user.username, contact: newContact }
+      );
       setContacts(res.data.contacts);
       setNewContact("");
     } catch (err) {
@@ -20,18 +21,20 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.reload(); // resets app → goes back to Login
+    window.location.reload();
   };
 
   return (
     <div className="sidebar">
-      <h2>{user.username}</h2>
+      {/* --- Premium Header --- */}
+      <div className="sidebar-header">
+        <h2 className="username">{user.username}</h2>
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
 
-      <button onClick={handleLogout} style={{ margin: "10px", padding: "5px 10px" }}>
-        Logout
-      </button>
-
-      <h3>Contacts</h3>
+      {/* --- Add Contact --- */}
       <div className="add-contact">
         <input
           type="text"
@@ -42,6 +45,7 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
         <button onClick={addContact}>+</button>
       </div>
 
+      {/* --- Contact List --- */}
       <ul>
         {contacts.map((c, i) => (
           <li key={i} onClick={() => setSelectedUser(c)}>
