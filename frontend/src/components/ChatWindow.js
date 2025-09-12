@@ -21,6 +21,7 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
 
   return (
     <div className="chat-window-container">
+      {/* Messages */}
       <div className="chat-messages">
         {messages.map((msg, idx) => (
           <div key={idx} className={`bubble ${msg.sender === "me" ? "me" : "other"}`}>
@@ -31,6 +32,7 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <div className="chat-input">
         <input
           type="text"
@@ -46,4 +48,5 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
 }
 
 export default ChatWindow;
+
 
