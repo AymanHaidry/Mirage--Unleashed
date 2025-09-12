@@ -59,7 +59,7 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
   };
 
   if (!selectedUser) {
-    return <div className="chat-window">Select a contact to start chatting</div>;
+    return <div className="chat-window flex items-center justify-center h-full text-2xl font-[cursive] text-brown-700 text-center"></div>;
   }
 
   return (
@@ -67,7 +67,7 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
       <div className="chat-header">
         {isMobile && (
           <button className="back-btn" onClick={onBack}>
-            ←
+            ↩
           </button>
         )}
         <span>
@@ -98,13 +98,25 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
           onKeyDown={handleKeyDown}
           placeholder="Type a message"
         />
-        <button onClick={sendMessage}>➤</button>
+        <button onClick={sendMessage}>✐ᝰ</button>
       </div>
     </div>
   );
 }
+<div className="chat-window">
+  {messages[selectedUser]?.map((msg, idx) => (
+    <div
+      key={idx}
+      className={msg.sender === user.username ? "bubble me" : "bubble other"}
+    >
+      {msg.text}
+    </div>
+  ))}
+</div>
+
 
 export default ChatWindow;
+
 
 
 
