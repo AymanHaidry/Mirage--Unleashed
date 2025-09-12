@@ -15,6 +15,7 @@ body {
   background: var(--background);
 }
 
+/* ----------------- APP CONTAINER ----------------- */
 .app-container {
   display: flex;
   height: 100vh;
@@ -125,7 +126,7 @@ body {
   overflow: hidden;
 }
 
-/* Chat header left-aligned with status */
+/* Chat header */
 .chat-header {
   display: flex;
   flex-direction: column;
@@ -244,28 +245,43 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 150px;
+  margin: 150px auto 0 auto;
+  width: 100%;
+  max-width: 300px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .login-container input {
-  margin: 8px;
+  margin: 8px 0;
   padding: 10px;
-  width: 200px;
+  width: 100%;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 .login-container button {
-  padding: 10px 20px;
+  margin-top: 12px;
+  padding: 10px 0;
+  width: 100%;
   background: var(--secondary);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .toggle-link {
   margin-top: 10px;
   cursor: pointer;
   color: var(--primary);
+  font-size: 14px;
+  text-align: center;
 }
 
 /* ----------------- RESPONSIVE ----------------- */
@@ -289,6 +305,10 @@ body {
   .chat-input button {
     font-size: 14px;
     padding: 8px;
+  }
+
+  .login-container {
+    margin-top: 80px;
   }
 }
 
