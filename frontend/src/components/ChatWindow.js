@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./ChatWindow.css"; // you can style bubbles here
+import '../styles/App.css'; // you can style bubbles here
 
 function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, setMessages }) {
   const [input, setInput] = useState("");
@@ -121,3 +121,4 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
 }
 
 export default ChatWindow;
+
