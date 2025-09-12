@@ -7,24 +7,23 @@ import "./styles/App.css";
 
 function App() {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
   });
 
   const [contacts, setContacts] = useState(() => {
-    const savedContacts = localStorage.getItem("contacts");
-    return savedContacts ? JSON.parse(savedContacts) : [];
+    const saved = localStorage.getItem("contacts");
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [messages, setMessages] = useState(() => {
-    const savedMessages = localStorage.getItem("messages");
-    return savedMessages ? JSON.parse(savedMessages) : {};
+    const saved = localStorage.getItem("messages");
+    return saved ? JSON.parse(saved) : {};
   });
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Save to localStorage
   useEffect(() => {
     if (user) localStorage.setItem("user", JSON.stringify(user));
   }, [user]);
@@ -32,19 +31,16 @@ function App() {
   useEffect(() => localStorage.setItem("contacts", JSON.stringify(contacts)), [contacts]);
   useEffect(() => localStorage.setItem("messages", JSON.stringify(messages)), [messages]);
 
-  // Resize listener
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Socket register
   useEffect(() => {
     if (user) socket.emit("registerSocket", user.username);
   }, [user]);
 
-  // Function to send message
   const sendMessage = (text) => {
     if (!text.trim() || !selectedUser) return;
 
@@ -55,15 +51,13 @@ function App() {
         { sender: "me", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
       ]
     }));
-
-    // You can emit via socket here if needed
-    // socket.emit("privateMessage", { to: selectedUser, text });
   };
 
   if (!user) return <Login setUser={setUser} setContacts={setContacts} />;
 
   return (
     <div className="app-container">
+      {/* Sidebar */}
       {(!isMobile || !selectedUser) && (
         <Sidebar
           user={user}
@@ -74,10 +68,11 @@ function App() {
         />
       )}
 
+      {/* Chat Window */}
       {(!isMobile || selectedUser) && (
         <ChatWindow
           selectedUser={selectedUser}
-          messages={messages[selectedUser] || []} // fallback to empty array
+          messages={messages[selectedUser] || []}
           sendMessage={sendMessage}
         />
       )}
@@ -86,3 +81,4 @@ function App() {
 }
 
 export default App;
+
