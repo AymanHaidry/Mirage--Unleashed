@@ -40,7 +40,27 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
     </div>
   );
 }
+function Sidebar({ user, contacts, setContacts, setSelectedUser, selectedUser }) {
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.reload(); // resets app → goes back to Login
+  };
+
+  return (
+    <div className="sidebar">
+      <h2>{user.username}</h2>
+
+      <button onClick={handleLogout} style={{ margin: "10px", padding: "5px 10px" }}>
+        Logout
+      </button>
+
+      {/* Rest of your sidebar code: contacts list, etc. */}
+    </div>
+  );
+}
+
 
 export default Sidebar;
+
 
 
