@@ -5,7 +5,6 @@ function ChatWindow({ selectedUser, messages, sendMessage, user }) {
   const [newMsg, setNewMsg] = useState("");
   const messagesEndRef = useRef(null);
 
-  // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -17,29 +16,23 @@ function ChatWindow({ selectedUser, messages, sendMessage, user }) {
   };
 
   if (!selectedUser) {
-    return (
-      <div className="chat-window-container">
-        <div className="empty-chat">
-          Select a contact to start chatting
-        </div>
-      </div>
-    );
+    return <div className="empty-chat">Select a contact to start chatting</div>;
   }
 
   return (
     <div className="chat-window-container">
-      {/* --- Header --- */}
+      {/* Header */}
       <div className="chat-header">
         <div className="chat-header-name">{selectedUser}</div>
         <div className="chat-header-status">Online</div>
       </div>
 
-      {/* --- Chat Messages --- */}
+      {/* Messages */}
       <div className="chat-messages">
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`bubble ${msg.sender === user.username ? "me" : "other"}`}
+            className={`bubble ${msg.sender === "me" ? "me" : "other"}`}
           >
             {msg.text}
             <div className="timestamp">{msg.time}</div>
@@ -48,7 +41,7 @@ function ChatWindow({ selectedUser, messages, sendMessage, user }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* --- Input --- */}
+      {/* Input */}
       <div className="chat-input">
         <input
           type="text"
@@ -64,9 +57,4 @@ function ChatWindow({ selectedUser, messages, sendMessage, user }) {
 }
 
 export default ChatWindow;
-
-
-
-
-
 
