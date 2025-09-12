@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "../styles/App.css"; // your main CSS
+import "../styles/App.css";
 
-function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
+function Sidebar({ user, contacts, setContacts, setSelectedUser, selectedUser }) {
   const [newContact, setNewContact] = useState("");
 
   const addContact = async () => {
     if (!newContact.trim()) return;
     try {
-      const res = await axios.post(
-        "https://mirage-server-concordia.onrender.com/addContact",
-        { owner: user.username, contact: newContact }
-      );
+      const res = await axios.post("https://mirage-server-concordia.onrender.com/addContact", {
+        owner: user.username,
+        contact: newContact,
+      });
       setContacts(res.data.contacts);
       setNewContact("");
     } catch (err) {
@@ -26,7 +26,7 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
 
   return (
     <div className="sidebar">
-      {/* --- Premium Header --- */}
+      {/* Header */}
       <div className="sidebar-header">
         <h2 className="username">{user.username}</h2>
         <button className="logout-btn" onClick={handleLogout}>
@@ -34,21 +34,26 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
         </button>
       </div>
 
-      {/* --- Add Contact --- */}
+      {/* Add Contact */}
       <div className="add-contact">
         <input
           type="text"
           placeholder="Add contact"
           value={newContact}
           onChange={(e) => setNewContact(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addContact()}
         />
         <button onClick={addContact}>+</button>
       </div>
 
-      {/* --- Contact List --- */}
+      {/* Contact List */}
       <ul>
         {contacts.map((c, i) => (
-          <li key={i} onClick={() => setSelectedUser(c)}>
+          <li
+            key={i}
+            className={selectedUser === c ? "active" : ""}
+            onClick={() => setSelectedUser(c)}
+          >
             {c}
           </li>
         ))}
