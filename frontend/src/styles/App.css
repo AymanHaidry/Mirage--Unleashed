@@ -248,6 +248,44 @@ body {
   border: 1px solid #ccc;
   align-self: flex-start;
 }
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 10px;
+  background: #fdf2e9; /* soft luxury cream */
+  border-bottom: 1px solid #e0d6ca;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.username {
+  font-family: 'Dancing Script', cursive; /* curvy/smooth font */
+  font-size: 1.3rem;
+  color: #5a3e36; /* premium brown */
+  margin: 0;
+}
+
+.logout-btn {
+  background: #a97c50; /* rich brown */
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.logout-btn:hover {
+  background: #b99060; /* lighter on hover */
+  transform: scale(1.05);
+}
+
+/* Add Google Font link at index.html head if not yet added */
+
 
 
 
