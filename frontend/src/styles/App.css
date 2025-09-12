@@ -277,6 +277,76 @@ body {
   border-radius: 3px;
 }
 
+/* Chat header in ChatWindow */
+.chat-window-header {
+  padding: 15px 10px;
+  background: #fdf2e9; 
+  border-bottom: 1px solid #e0d6ca;
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.5rem;
+  color: #5a3e36;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Message slide-in animation */
+.bubble {
+  max-width: 60%;
+  padding: 12px 18px;
+  border-radius: 20px;
+  margin: 8px 0;
+  font-size: 1rem;
+  position: relative;
+  word-wrap: break-word;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideIn 0.3s forwards;
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sent messages (me) slide from right */
+.me {
+  background: var(--light);
+  align-self: flex-end;
+  color: var(--dark);
+  border-top-right-radius: 0;
+  animation: slideInRight 0.3s forwards;
+}
+
+/* Received messages (other) slide from left */
+.other {
+  background: white;
+  border: 1px solid #ccc;
+  align-self: flex-start;
+  border-top-left-radius: 0;
+  animation: slideInLeft 0.3s forwards;
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  0% { opacity: 0; transform: translateX(50px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  0% { opacity: 0; transform: translateX(-50px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Optional: smooth bubble shadow for depth */
+.bubble {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+}
 
 
 
