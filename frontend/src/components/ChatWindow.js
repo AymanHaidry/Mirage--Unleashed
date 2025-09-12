@@ -113,9 +113,33 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
     </div>
   ))}
 </div>
+const [newMessage, setNewMessage] = useState("");
+
+const sendMessage = () => {
+  if (!newMessage.trim()) return;
+
+  socket.emit("sendMessage", {
+    to: selectedUser.username,
+    from: user.username,
+    text: newMessage,
+  });
+
+  // 👇 Add this here
+  setMessages((prev) => ({
+    ...prev,
+    [selectedUser.username]: [
+      ...(prev[selectedUser.username] || []),
+      { sender: user.username, text: newMessage },
+    ],
+  }));
+
+  setNewMessage("");
+};
+
 
 
 export default ChatWindow;
+
 
 
 
