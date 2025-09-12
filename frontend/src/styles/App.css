@@ -225,6 +225,31 @@ body {
     padding: 8px;
   }
 }
+.chat-window {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bubble {
+  max-width: 60%;
+  padding: 10px;
+  border-radius: 15px;
+  margin: 5px 0;
+}
+
+.me {
+  background: #dcf8c6; /* WhatsApp green */
+  align-self: flex-end;
+}
+
+.other {
+  background: #fff;
+  border: 1px solid #ccc;
+  align-self: flex-start;
+}
+
+
 
 
 
