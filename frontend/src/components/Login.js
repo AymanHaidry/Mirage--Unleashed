@@ -1,6 +1,17 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+<div className="login-container">
+  <div className="login-card">
+    <h2>Login</h2>
+    <input type="text" placeholder="Username" />
+    <input type="password" placeholder="Password" />
+    <button>Login</button>
+    <div className="toggle-link">No account? Register</div>
+  </div>
+</div>
+
+
 function Login({ setUser, setContacts }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +62,7 @@ function Login({ setUser, setContacts }) {
 }
 
 export default Login;
+
 
 
 
