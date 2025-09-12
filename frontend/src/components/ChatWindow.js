@@ -5,23 +5,34 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
   const [newMsg, setNewMsg] = useState("");
   const messagesEndRef = useRef(null);
 
+  // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = () => {
-    if (!newMsg.trim()) return;
     sendMessage(newMsg);
     setNewMsg("");
   };
 
   if (!selectedUser) {
-    return <div className="empty-chat">Select a contact to start chatting</div>;
+    return (
+      <div className="chat-window-container">
+        <div className="empty-chat">
+          Select a contact to start chatting
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="chat-window-container">
-      {/* Messages */}
+      {/* --- Header showing recipient --- */}
+      <div className="chat-window-header">
+        {selectedUser}
+      </div>
+
+      {/* --- Chat Messages --- */}
       <div className="chat-messages">
         {messages.map((msg, idx) => (
           <div key={idx} className={`bubble ${msg.sender === "me" ? "me" : "other"}`}>
@@ -32,7 +43,7 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* --- Chat Input --- */}
       <div className="chat-input">
         <input
           type="text"
@@ -48,5 +59,7 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
 }
 
 export default ChatWindow;
+
+
 
 
