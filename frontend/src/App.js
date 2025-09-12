@@ -24,18 +24,13 @@ function App() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Save to localStorage whenever user, contacts, or messages change
+  // Save to localStorage
   useEffect(() => {
     if (user) localStorage.setItem("user", JSON.stringify(user));
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem("contacts", JSON.stringify(contacts));
-  }, [contacts]);
-
-  useEffect(() => {
-    localStorage.setItem("messages", JSON.stringify(messages));
-  }, [messages]);
+  useEffect(() => localStorage.setItem("contacts", JSON.stringify(contacts)), [contacts]);
+  useEffect(() => localStorage.setItem("messages", JSON.stringify(messages)), [messages]);
 
   // Resize listener
   useEffect(() => {
@@ -44,14 +39,28 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Register socket
+  // Socket register
   useEffect(() => {
     if (user) socket.emit("registerSocket", user.username);
   }, [user]);
 
-  if (!user) {
-    return <Login setUser={setUser} setContacts={setContacts} />;
-  }
+  // Function to send message
+  const sendMessage = (text) => {
+    if (!text.trim() || !selectedUser) return;
+
+    setMessages(prev => ({
+      ...prev,
+      [selectedUser]: [
+        ...(prev[selectedUser] || []),
+        { sender: "me", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+      ]
+    }));
+
+    // You can emit via socket here if needed
+    // socket.emit("privateMessage", { to: selectedUser, text });
+  };
+
+  if (!user) return <Login setUser={setUser} setContacts={setContacts} />;
 
   return (
     <div className="app-container">
@@ -67,13 +76,9 @@ function App() {
 
       {(!isMobile || selectedUser) && (
         <ChatWindow
-          socket={socket}
-          user={user}
           selectedUser={selectedUser}
-          onBack={() => setSelectedUser(null)}
-          isMobile={isMobile}
-          messages={messages}
-          setMessages={setMessages}
+          messages={messages[selectedUser] || []} // fallback to empty array
+          sendMessage={sendMessage}
         />
       )}
     </div>
@@ -81,6 +86,3 @@ function App() {
 }
 
 export default App;
-
-
-
