@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/App.css";
 
-function ChatWindow({ selectedUser, messages, sendMessage }) {
+function ChatWindow({ selectedUser, messages, sendMessage, user }) {
   const [newMsg, setNewMsg] = useState("");
   const messagesEndRef = useRef(null);
 
-  // Auto scroll to bottom
+  // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = () => {
+    if (!newMsg.trim()) return;
     sendMessage(newMsg);
     setNewMsg("");
   };
@@ -27,15 +28,19 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
 
   return (
     <div className="chat-window-container">
-      {/* --- Header showing recipient --- */}
-      <div className="chat-window-header">
-        {selectedUser}
+      {/* --- Header --- */}
+      <div className="chat-header">
+        <div className="chat-header-name">{selectedUser}</div>
+        <div className="chat-header-status">Online</div>
       </div>
 
       {/* --- Chat Messages --- */}
       <div className="chat-messages">
         {messages.map((msg, idx) => (
-          <div key={idx} className={`bubble ${msg.sender === "me" ? "me" : "other"}`}>
+          <div
+            key={idx}
+            className={`bubble ${msg.sender === user.username ? "me" : "other"}`}
+          >
             {msg.text}
             <div className="timestamp">{msg.time}</div>
           </div>
@@ -43,7 +48,7 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* --- Chat Input --- */}
+      {/* --- Input --- */}
       <div className="chat-input">
         <input
           type="text"
@@ -59,6 +64,8 @@ function ChatWindow({ selectedUser, messages, sendMessage }) {
 }
 
 export default ChatWindow;
+
+
 
 
 
