@@ -363,4 +363,63 @@ body {
   cursor: pointer;
   color: var(--primary);
 }
+/* LOGIN PAGE BACKGROUND */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* vertically center */
+  height: 100vh; /* full screen */
+  background-image: url('/e9599ad2-0231-4b05-a430-18af8aee28a1.png'); /* use your uploaded image path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* LOGIN CARD */
+.login-card {
+  background: rgba(255, 255, 255, 0.9); /* slightly transparent white for contrast */
+  padding: 40px 30px; /* reduce padding to avoid long forehead */
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  width: 320px; /* fixed width */
+  text-align: center;
+}
+
+/* Login inputs */
+.login-card input {
+  margin: 10px 0;
+  padding: 12px 15px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--muted);
+  font-size: 14px;
+}
+
+/* Login button */
+.login-card button {
+  margin-top: 15px;
+  padding: 12px;
+  width: 100%;
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-card button:hover {
+  transform: scale(1.03);
+}
+
+/* Toggle link */
+.toggle-link {
+  margin-top: 12px;
+  cursor: pointer;
+  color: var(--primary);
+  font-size: 14px;
+}
+
 
