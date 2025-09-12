@@ -30,13 +30,12 @@ body {
   overflow-y: auto;
 }
 
-/* Sidebar Header - username + logout */
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 10px;
-  background: #fdf2e9; /* soft luxury cream */
+  background: #fdf2e9;
   border-bottom: 1px solid #e0d6ca;
   border-radius: 12px;
   margin-bottom: 15px;
@@ -44,9 +43,9 @@ body {
 }
 
 .username {
-  font-family: 'Dancing Script', cursive; /* premium font */
+  font-family: 'Dancing Script', cursive;
   font-size: 1.3rem;
-  color: #5a3e36; /* premium brown */
+  color: #5a3e36;
   margin: 0;
 }
 
@@ -66,7 +65,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Add Contact */
 .add-contact {
   display: flex;
   margin-bottom: 15px;
@@ -95,7 +93,6 @@ body {
   opacity: 0.9;
 }
 
-/* Contact list */
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -131,12 +128,11 @@ body {
 /* Chat header left-aligned with status */
 .chat-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 12px 15px;
   background: #f5f5f5;
   border-bottom: 1px solid #ddd;
-  font-family: Arial, sans-serif;
 }
 
 .chat-header-name {
@@ -148,6 +144,7 @@ body {
 .chat-header-status {
   font-size: 0.85rem;
   color: #666;
+  margin-top: 2px;
 }
 
 /* Chat Messages Area */
@@ -157,6 +154,7 @@ body {
   padding: 15px;
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
 /* Chat Bubbles */
@@ -164,13 +162,22 @@ body {
   max-width: 60%;
   padding: 12px 18px;
   border-radius: 18px;
-  margin: 6px 0;
   line-height: 1.4;
   word-wrap: break-word;
   position: relative;
   background: #fff;
   box-shadow: 0 4px 6px rgba(0,0,0,0.08);
   transition: all 0.2s ease;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: slideIn 0.2s forwards;
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .me {
@@ -186,7 +193,6 @@ body {
   border-top-left-radius: 0;
 }
 
-/* Timestamp */
 .timestamp {
   font-size: 10px;
   color: var(--muted);
@@ -194,7 +200,6 @@ body {
   text-align: right;
 }
 
-/* Chat Input */
 .chat-input {
   display: flex;
   padding: 12px 15px;
@@ -234,6 +239,35 @@ body {
   text-align: center;
 }
 
+/* ----------------- LOGIN ----------------- */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 150px;
+}
+
+.login-container input {
+  margin: 8px;
+  padding: 10px;
+  width: 200px;
+}
+
+.login-container button {
+  padding: 10px 20px;
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-link {
+  margin-top: 10px;
+  cursor: pointer;
+  color: var(--primary);
+}
+
 /* ----------------- RESPONSIVE ----------------- */
 @media (max-width: 768px) {
   .app-container {
@@ -267,4 +301,3 @@ body {
   background: var(--muted);
   border-radius: 3px;
 }
-
