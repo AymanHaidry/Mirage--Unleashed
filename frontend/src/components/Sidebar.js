@@ -18,29 +18,6 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser }) {
     }
   };
 
-  return (
-    <div className="sidebar">
-      <h3>Contacts</h3>
-      <div className="add-contact">
-        <input
-          type="text"
-          placeholder="Add contact"
-          value={newContact}
-          onChange={(e) => setNewContact(e.target.value)}
-        />
-        <button onClick={addContact}>+</button>
-      </div>
-      <ul>
-        {contacts.map((c, i) => (
-          <li key={i} onClick={() => setSelectedUser(c)}>
-            {c}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-function Sidebar({ user, contacts, setContacts, setSelectedUser, selectedUser }) {
   const handleLogout = () => {
     localStorage.clear();
     window.location.reload(); // resets app → goes back to Login
@@ -54,13 +31,30 @@ function Sidebar({ user, contacts, setContacts, setSelectedUser, selectedUser })
         Logout
       </button>
 
-      {/* Rest of your sidebar code: contacts list, etc. */}
+      <h3>Contacts</h3>
+      <div className="add-contact">
+        <input
+          type="text"
+          placeholder="Add contact"
+          value={newContact}
+          onChange={(e) => setNewContact(e.target.value)}
+        />
+        <button onClick={addContact}>+</button>
+      </div>
+
+      <ul>
+        {contacts.map((c, i) => (
+          <li key={i} onClick={() => setSelectedUser(c)}>
+            {c}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-
 export default Sidebar;
+
 
 
 
