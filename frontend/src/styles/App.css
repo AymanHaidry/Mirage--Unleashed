@@ -334,6 +334,20 @@ body {
   border-radius: 3px;
 }
 
+.chat-header button {
+  background: var(--secondary);
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.bubble img {
+  border-radius: 10px;
+  max-width: 100%;
+}
+
 
 
 
