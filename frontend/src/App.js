@@ -1,110 +1,116 @@
+// App.js
 import React, { useState, useEffect } from "react";
-import socket from "./utils/socket";
-import Login from "./components/Login";
-import Sidebar from "./components/Sidebar";
-import ChatWindow from "./components/ChatWindow";
-import "./styles/App.css";
+import io from "socket.io-client";
+import ChatWindow from "./ChatWindow";
 
-function App() {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+const socket = io("http://localhost:5000");
 
-  const [contacts, setContacts] = useState(() => {
-    const savedContacts = localStorage.getItem("contacts");
-    return savedContacts ? JSON.parse(savedContacts) : [];
-  });
-
-  // Structure: { "Alice": [{sender, text, time}, ...], "Bob": [...] }
-  const [messages, setMessages] = useState(() => {
-    const savedMessages = localStorage.getItem("messages");
-    return savedMessages ? JSON.parse(savedMessages) : {};
-  });
-
+export default function App() {
+  const [username, setUsername] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [messages, setMessages] = useState({}); // { contact: [msgs] }
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Save user, contacts, messages to localStorage
-  useEffect(() => { if (user) localStorage.setItem("user", JSON.stringify(user)); }, [user]);
-  useEffect(() => localStorage.setItem("contacts", JSON.stringify(contacts)), [contacts]);
-  useEffect(() => localStorage.setItem("messages", JSON.stringify(messages)), [messages]);
-
-  // Resize listener
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Register socket
-  useEffect(() => {
-    if (user) socket.emit("registerSocket", user.username);
-  }, [user]);
-
-  // Listen for incoming messages
-  useEffect(() => {
-    if (!user) return;
-
-    socket.on("receiveMessage", ({ from, text }) => {
-      setMessages(prev => ({
+    socket.on("privateMessage", ({ from, message }) => {
+      setMessages((prev) => ({
         ...prev,
-        [from]: [
-          ...(prev[from] || []),
-          { sender: from, text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-        ]
+        [from]: [...(prev[from] || []), message],
       }));
+
+      // 🔔 Push notification if tab not active
+      if (document.hidden && Notification.permission === "granted") {
+        new Notification(`Message from ${from}`, {
+          body: message.text || message.name || "File",
+        });
+      }
+
+      socket.emit("messageDelivered", { to: from, messageId: message.id });
     });
 
-    return () => socket.off("receiveMessage");
-  }, [user]);
+    socket.on("messageDelivered", ({ messageId }) => {
+      updateMessageStatus(messageId, "delivered");
+    });
 
-  if (!user) return <Login setUser={setUser} setContacts={setContacts} />;
+    socket.on("markRead", ({ ids }) => {
+      ids.forEach((id) => updateMessageStatus(id, "read"));
+    });
+
+    return () => {
+      socket.off("privateMessage");
+      socket.off("messageDelivered");
+      socket.off("markRead");
+    };
+  }, []);
+
+  const updateMessageStatus = (id, status) => {
+    setMessages((prev) => {
+      const updated = { ...prev };
+      for (let user in updated) {
+        updated[user] = updated[user].map((m) =>
+          m.id === id ? { ...m, status } : m
+        );
+      }
+      return updated;
+    });
+  };
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    if (Notification && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="login-container">
+        <div className="login-card">
+          <h2>Login</h2>
+          <input
+            type="text"
+            placeholder="Enter username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <button onClick={handleLogin}>Login</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
-      {(!isMobile || !selectedUser) && (
-        <Sidebar
-          user={user}
-          contacts={contacts}
-          setContacts={setContacts}
-          setSelectedUser={setSelectedUser}
-          selectedUser={selectedUser}
-        />
-      )}
-
-      {(!isMobile || selectedUser) && (
-        <ChatWindow
-          socket={socket}
-          user={user}
-          selectedUser={selectedUser}
-          onBack={() => setSelectedUser(null)}
-          isMobile={isMobile}
-          messages={messages[selectedUser] || []}
-          sendMessage={(text) => {
-            if (!text.trim() || !selectedUser) return;
-
-            // Add locally
-            setMessages(prev => ({
-              ...prev,
-              [selectedUser]: [
-                ...(prev[selectedUser] || []),
-                { sender: "me", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-              ]
-            }));
-
-            // Emit to server
-            socket.emit("sendMessage", {
-              to: selectedUser,
-              from: user.username,
-              text
-            });
-          }}
-        />
-      )}
+      <div className="sidebar">
+        <h3>Contacts</h3>
+        <ul>
+          {Object.keys(messages).map((u) => (
+            <li
+              key={u}
+              className={selectedUser === u ? "active" : ""}
+              onClick={() => {
+                setSelectedUser(u);
+                // mark read
+                const unread = (messages[u] || [])
+                  .filter((m) => m.status !== "read")
+                  .map((m) => m.id);
+                if (unread.length) {
+                  socket.emit("markRead", { to: u, ids: unread });
+                }
+              }}
+            >
+              {u}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <ChatWindow
+        socket={socket}
+        user={username}
+        selectedUser={selectedUser}
+        messages={messages[selectedUser] || []}
+        setMessages={setMessages}
+      />
     </div>
   );
 }
-
-export default App;
-
