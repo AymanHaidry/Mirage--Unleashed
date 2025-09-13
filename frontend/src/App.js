@@ -1,7 +1,8 @@
 // App.js
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
-import ChatWindow from "./ChatWindow";
+import ChatWindow from "./components/ChatWindow";
+
 
 const socket = io("http://localhost:5000");
 
