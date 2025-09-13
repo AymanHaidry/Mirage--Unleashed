@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import ChatWindow from "./components/ChatWindow";
-import Login from "./components/Login";   // 👈 add this
+import Login from "./components/Login";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://mirage-server-concordia.onrender.com"); // Render backend
 
 export default function App() {
   const [username, setUsername] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [contacts, setContacts] = useState([]);
   const [messages, setMessages] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     socket.on("privateMessage", ({ from, message }) => {
@@ -59,13 +61,17 @@ export default function App() {
     if (Notification && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
+    // Register socket for this user
+    socket.emit("registerSocket", username);
   };
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn || !user) {
     return (
       <Login
         username={username}
         setUsername={setUsername}
+        setUser={setUser}
+        setContacts={setContacts}
         onLogin={handleLogin}
       />
     );
@@ -76,7 +82,7 @@ export default function App() {
       <div className="sidebar">
         <h3>Contacts</h3>
         <ul>
-          {Object.keys(messages).map((u) => (
+          {contacts.map((u) => (
             <li
               key={u}
               className={selectedUser === u ? "active" : ""}
@@ -105,4 +111,3 @@ export default function App() {
     </div>
   );
 }
-
