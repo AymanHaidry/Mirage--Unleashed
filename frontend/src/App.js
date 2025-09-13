@@ -1,15 +1,14 @@
-// App.js
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import ChatWindow from "./components/ChatWindow";
-
+import Login from "./components/Login";   // 👈 add this
 
 const socket = io("http://localhost:5000");
 
 export default function App() {
   const [username, setUsername] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [messages, setMessages] = useState({}); // { contact: [msgs] }
+  const [messages, setMessages] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
@@ -19,7 +18,6 @@ export default function App() {
         [from]: [...(prev[from] || []), message],
       }));
 
-      // 🔔 Push notification if tab not active
       if (document.hidden && Notification.permission === "granted") {
         new Notification(`Message from ${from}`, {
           body: message.text || message.name || "File",
@@ -65,18 +63,11 @@ export default function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="login-container">
-        <div className="login-card">
-          <h2>Login</h2>
-          <input
-            type="text"
-            placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <button onClick={handleLogin}>Login</button>
-        </div>
-      </div>
+      <Login
+        username={username}
+        setUsername={setUsername}
+        onLogin={handleLogin}
+      />
     );
   }
 
@@ -91,7 +82,6 @@ export default function App() {
               className={selectedUser === u ? "active" : ""}
               onClick={() => {
                 setSelectedUser(u);
-                // mark read
                 const unread = (messages[u] || [])
                   .filter((m) => m.status !== "read")
                   .map((m) => m.id);
@@ -115,3 +105,4 @@ export default function App() {
     </div>
   );
 }
+
