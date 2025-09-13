@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-function Login({ setUser, setContacts }) {
-  const [username, setUsername] = useState("");
+const API = "https://mirage-server-concordia.onrender.com";
+
+function Login({ username, setUsername, setUser, setContacts, onLogin }) {
   const [password, setPassword] = useState("");
   const [isRegister, setIsRegister] = useState(false);
 
@@ -11,13 +12,14 @@ function Login({ setUser, setContacts }) {
 
     try {
       if (isRegister) {
-        await axios.post("https://mirage-server-concordia.onrender.com/register", { username, password });
+        await axios.post(`${API}/register`, { username, password });
         alert("✅ Registered! Now log in.");
         setIsRegister(false);
       } else {
-        const res = await axios.post("https://mirage-server-concordia.onrender.com/login", { username, password });
+        const res = await axios.post(`${API}/login`, { username, password });
         setUser({ username });
         setContacts(res.data.contacts || []);
+        onLogin(); // switch to chat
       }
     } catch (err) {
       alert(err.response?.data?.error || "Something went wrong");
@@ -28,11 +30,11 @@ function Login({ setUser, setContacts }) {
     <div
       className="login-container"
       style={{
-        backgroundImage: "url('/chat-bg.jpeg')", // uses public folder
+        backgroundImage: "url('/chat-bg.jpeg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        height: "100vh",       // full screen
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -42,7 +44,7 @@ function Login({ setUser, setContacts }) {
       <div
         className="login-card"
         style={{
-          background: "rgba(255, 255, 255, 0.95)", // slightly transparent for contrast
+          background: "rgba(255, 255, 255, 0.95)",
           padding: "30px 25px",
           borderRadius: "16px",
           boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
@@ -102,7 +104,9 @@ function Login({ setUser, setContacts }) {
           style={{ cursor: "pointer", color: "blue", marginTop: "12px" }}
           onClick={() => setIsRegister(!isRegister)}
         >
-          {isRegister ? "Already have an account? Login" : "No account? Register"}
+          {isRegister
+            ? "Already have an account? Login"
+            : "No account? Register"}
         </p>
       </div>
     </div>
