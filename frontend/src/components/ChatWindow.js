@@ -165,7 +165,6 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
   );
 }
 
-  );
-}
+
 
 
