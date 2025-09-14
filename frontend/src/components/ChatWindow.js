@@ -4,9 +4,15 @@ import axios from "axios";
 export default function ChatWindow({ socket, user, selectedUser, messages, setMessages }) {
   const [text, setText] = useState("");
   const fileInputRef = useRef();
+  const messagesEndRef = useRef();
   const pcRef = useRef(null);
 
-  // Receive messages
+  // Scroll to bottom when messages update
+  useEffect(() => {
+    if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Incoming messages listener
   useEffect(() => {
     if (!socket) return;
 
@@ -15,11 +21,28 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
         ...prev,
         [from]: [...(prev[from] || []), message],
       }));
+      if (document.hidden && Notification.permission === "granted") {
+        new Notification(`Message from ${from}`, {
+          body: message.text || message.name || "File",
+        });
+      }
+      socket.emit("messageDelivered", { to: from, messageId: message.id });
+    };
+
+    // Call notification
+    const handleCallOffer = async ({ from }) => {
+      if (Notification.permission === "granted") {
+        new Notification(`Incoming call from ${from}`, { body: "Click to answer" });
+      }
     };
 
     socket.on("privateMessage", handleIncoming);
+    socket.on("call-offer", handleCallOffer);
 
-    return () => socket.off("privateMessage", handleIncoming);
+    return () => {
+      socket.off("privateMessage", handleIncoming);
+      socket.off("call-offer", handleCallOffer);
+    };
   }, [socket, setMessages]);
 
   const sendMessage = () => {
@@ -60,11 +83,9 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
       ...prev,
       [selectedUser]: [...(prev[selectedUser] || []), msg],
     }));
-
     socket.emit("privateMessage", { to: selectedUser, message: msg });
   };
 
-  // Minimal WebRTC call
   const startCall = async () => {
     if (!selectedUser) return;
 
@@ -100,13 +121,13 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
     <div className="chat-window-container">
       {selectedUser ? (
         <>
-          <div className="chat-header">
+          <div className="chat-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span className="chat-header-name">{selectedUser}</span>
             <button onClick={startCall}>📞 Call</button>
           </div>
 
           <div className="chat-messages">
-            {messages.map(m => (
+            {messages[selectedUser]?.map(m => (
               <div key={m.id} className={`bubble ${m.sender === user ? "me" : "other"}`}>
                 {m.type === "file" ? (
                   m.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
@@ -123,17 +144,18 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="chat-input">
-            <input value={text} onChange={e => setText(e.target.value)} placeholder="Type..." />
-            <button onClick={sendMessage}>Send</button>
             <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={handleFileUpload}
+              value={text}
+              onChange={e => setText(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && sendMessage()}
+              placeholder="Type..."
             />
+            <button onClick={sendMessage}>Send</button>
+            <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileUpload} />
             <button onClick={() => fileInputRef.current.click()}>📂</button>
           </div>
 
@@ -146,3 +168,4 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
     </div>
   );
 }
+
