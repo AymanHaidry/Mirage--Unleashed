@@ -1,13 +1,29 @@
-// ChatWindow.js
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 export default function ChatWindow({ socket, user, selectedUser, messages, setMessages }) {
   const [text, setText] = useState("");
   const fileInputRef = useRef();
+  const pcRef = useRef(null);
+
+  // Receive messages
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleIncoming = ({ from, message }) => {
+      setMessages(prev => ({
+        ...prev,
+        [from]: [...(prev[from] || []), message],
+      }));
+    };
+
+    socket.on("privateMessage", handleIncoming);
+
+    return () => socket.off("privateMessage", handleIncoming);
+  }, [socket, setMessages]);
 
   const sendMessage = () => {
-    if (!text.trim()) return;
+    if (!text.trim() || !selectedUser) return;
     const msg = {
       id: Date.now().toString(),
       sender: user,
@@ -15,7 +31,7 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
       time: new Date().toLocaleTimeString(),
       status: "sent",
     };
-    setMessages((prev) => ({
+    setMessages(prev => ({
       ...prev,
       [selectedUser]: [...(prev[selectedUser] || []), msg],
     }));
@@ -25,10 +41,11 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !selectedUser) return;
     const fd = new FormData();
     fd.append("file", file);
-    const res = await axios.post("http://localhost:5000/upload", fd);
+    const res = await axios.post("https://mirage-server-concordia.onrender.com/upload", fd);
+
     const msg = {
       id: Date.now().toString(),
       sender: user,
@@ -38,28 +55,31 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
       time: new Date().toLocaleTimeString(),
       status: "sent",
     };
-    setMessages((prev) => ({
+
+    setMessages(prev => ({
       ...prev,
       [selectedUser]: [...(prev[selectedUser] || []), msg],
     }));
+
     socket.emit("privateMessage", { to: selectedUser, message: msg });
   };
 
-  // CALLS (WebRTC minimal)
+  // Minimal WebRTC call
   const startCall = async () => {
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
+    if (!selectedUser) return;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+    pcRef.current = pc;
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     document.getElementById("localVideo").srcObject = stream;
-    stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+    stream.getTracks().forEach(t => pc.addTrack(t, stream));
 
-    pc.ontrack = (e) => {
+    pc.ontrack = e => {
       document.getElementById("remoteVideo").srcObject = e.streams[0];
     };
 
-    pc.onicecandidate = (e) => {
+    pc.onicecandidate = e => {
       if (e.candidate) socket.emit("ice-candidate", { to: selectedUser, candidate: e.candidate });
     };
 
@@ -70,6 +90,7 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
     socket.on("call-answer", async ({ answer }) => {
       await pc.setRemoteDescription(answer);
     });
+
     socket.on("ice-candidate", async ({ candidate }) => {
       await pc.addIceCandidate(candidate);
     });
@@ -85,7 +106,7 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
           </div>
 
           <div className="chat-messages">
-            {messages.map((m) => (
+            {messages.map(m => (
               <div key={m.id} className={`bubble ${m.sender === user ? "me" : "other"}`}>
                 {m.type === "file" ? (
                   m.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
@@ -105,7 +126,7 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
           </div>
 
           <div className="chat-input">
-            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type..." />
+            <input value={text} onChange={e => setText(e.target.value)} placeholder="Type..." />
             <button onClick={sendMessage}>Send</button>
             <input
               type="file"
