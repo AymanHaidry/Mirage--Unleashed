@@ -5,45 +5,39 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
   const [text, setText] = useState("");
   const fileInputRef = useRef();
   const messagesEndRef = useRef();
-  const pcRef = useRef(null);
 
-  // Scroll chat to bottom when messages change
+  // Scroll to bottom on new messages
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages, selectedUser]);
 
-  // Handle incoming messages
+  // Incoming messages
   useEffect(() => {
     if (!socket) return;
 
-    const handleIncoming = ({ from, message }) => {
+    const handleMessage = ({ from, message }) => {
       setMessages(prev => ({
         ...prev,
         [from]: [...(prev[from] || []), message],
       }));
-
-      if (document.hidden && Notification.permission === "granted") {
-        new Notification(`Message from ${from}`, {
-          body: message.text || message.name || "File",
-        });
-      }
       socket.emit("messageDelivered", { to: from, messageId: message.id });
+      if (document.hidden && Notification.permission === "granted") {
+        new Notification(`Message from ${from}`, { body: message.text || message.name || "File" });
+      }
     };
 
-    const handleCallOffer = ({ from }) => {
+    const handleCall = ({ from }) => {
       if (Notification.permission === "granted") {
         new Notification(`Incoming call from ${from}`, { body: "Click to answer" });
       }
     };
 
-    socket.on("privateMessage", handleIncoming);
-    socket.on("call-offer", handleCallOffer);
+    socket.on("privateMessage", handleMessage);
+    socket.on("call-offer", handleCall);
 
     return () => {
-      socket.off("privateMessage", handleIncoming);
-      socket.off("call-offer", handleCallOffer);
+      socket.off("privateMessage", handleMessage);
+      socket.off("call-offer", handleCall);
     };
   }, [socket, setMessages]);
 
@@ -89,7 +83,6 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
       ...prev,
       [selectedUser]: [...(prev[selectedUser] || []), msg],
     }));
-
     socket.emit("privateMessage", { to: selectedUser, message: msg });
   };
 
@@ -97,7 +90,6 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
     if (!selectedUser) return;
 
     const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
-    pcRef.current = pc;
 
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     document.getElementById("localVideo").srcObject = stream;
@@ -124,59 +116,56 @@ export default function ChatWindow({ socket, user, selectedUser, messages, setMe
     });
   };
 
+  if (!selectedUser) return <div className="empty-chat">Select a user to chat</div>;
+
   return (
-    <div className="chat-window-container">
-      {selectedUser ? (
-        <>
-          {/* Header with Call button left, Name right */}
-          <div className="chat-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <button onClick={startCall}>📞 Call</button>
-            <span className="chat-header-name">{selectedUser}</span>
-          </div>
+    <div className="chat-window-container" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Header: Call left, Name right */}
+      <div className="chat-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 15px", borderBottom: "1px solid #ddd", background: "#f5f5f5" }}>
+        <button onClick={startCall} style={{ background: "#128c7e", color: "#fff", border: "none", borderRadius: "6px", padding: "6px 12px", cursor: "pointer" }}>📞 Call</button>
+        <span className="chat-header-name" style={{ fontWeight: "bold" }}>{selectedUser}</span>
+      </div>
 
-          {/* Messages */}
-          <div className="chat-messages" style={{ flex: 1, overflowY: "auto" }}>
-            {messages[selectedUser]?.map(m => (
-              <div key={m.id} className={`bubble ${m.sender === user ? "me" : "other"}`}>
-                {m.type === "file" ? (
-                  m.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                    <img src={m.fileUrl} alt={m.name} style={{ maxWidth: "150px", borderRadius: "10px" }} />
-                  ) : (
-                    <a href={m.fileUrl} target="_blank" rel="noreferrer">{m.name}</a>
-                  )
-                ) : (
-                  m.text
-                )}
-                <div className="timestamp">
-                  {m.time} {m.status === "sent" && "✓"} {m.status === "delivered" && "✓✓"}{" "}
-                  {m.status === "read" && "✓✓ (blue)"}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+      {/* Messages */}
+      <div className="chat-messages" style={{ flex: 1, overflowY: "auto", padding: "15px", background: "#ece5dd" }}>
+        {messages[selectedUser]?.map(m => (
+          <div key={m.id} className={`bubble ${m.sender === user ? "me" : "other"}`} style={{ maxWidth: "60%", marginBottom: "8px", alignSelf: m.sender === user ? "flex-end" : "flex-start" }}>
+            {m.type === "file" ? (
+              m.fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                <img src={m.fileUrl} alt={m.name} style={{ maxWidth: "150px", borderRadius: "10px" }} />
+              ) : (
+                <a href={m.fileUrl} target="_blank" rel="noreferrer">{m.name}</a>
+              )
+            ) : m.text}
+            <div className="timestamp" style={{ fontSize: "10px", color: "#555", textAlign: "right" }}>
+              {m.time} {m.status === "sent" && "✓"} {m.status === "delivered" && "✓✓"} {m.status === "read" && "✓✓ (blue)"}
+            </div>
           </div>
+        ))}
+        <div ref={messagesEndRef}></div>
+      </div>
 
-          {/* Message input pinned at bottom */}
-          <div className="chat-input" style={{ display: "flex", padding: "12px 15px", borderTop: "1px solid #ddd", background: "#fafafa" }}>
-            <input
-              value={text}
-              onChange={e => setText(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && sendMessage()}
-              placeholder="Type a message..."
-              style={{ flex: 1, padding: "10px 15px", borderRadius: "20px", border: "1px solid #ccc", fontSize: "16px" }}
-            />
-            <button onClick={sendMessage} style={{ marginLeft: "10px", borderRadius: "20px", background: "#128c7e", color: "#fff", fontWeight: "bold", border: "none", padding: "10px 18px", cursor: "pointer" }}>Send</button>
-            <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileUpload} />
-            <button onClick={() => fileInputRef.current.click()} style={{ marginLeft: "5px", borderRadius: "20px", background: "#075e54", color: "#fff", border: "none", padding: "10px 14px", cursor: "pointer" }}>📂</button>
-          </div>
+      {/* Input pinned at bottom */}
+      <div className="chat-input" style={{ display: "flex", padding: "12px 15px", borderTop: "1px solid #ddd", background: "#fafafa" }}>
+        <input
+          value={text}
+          onChange={e => setText(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && sendMessage()}
+          placeholder="Type a message..."
+          style={{ flex: 1, padding: "10px 15px", borderRadius: "20px", border: "1px solid #ccc", fontSize: "16px" }}
+        />
+        <button onClick={sendMessage} style={{ marginLeft: "10px", borderRadius: "20px", background: "#128c7e", color: "#fff", fontWeight: "bold", border: "none", padding: "10px 18px", cursor: "pointer" }}>Send</button>
+        <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileUpload} />
+        <button onClick={() => fileInputRef.current.click()} style={{ marginLeft: "5px", borderRadius: "20px", background: "#075e54", color: "#fff", border: "none", padding: "10px 14px", cursor: "pointer" }}>📂</button>
+      </div>
 
-          <video id="localVideo" autoPlay playsInline muted width="150" />
-          <video id="remoteVideo" autoPlay playsInline width="150" />
-        </>
-      ) : (
-        <div className="empty-chat">Select a user to chat</div>
-      )}
+      <video id="localVideo" autoPlay playsInline muted width="150" />
+      <video id="remoteVideo" autoPlay playsInline width="150" />
     </div>
   );
 }
+
+  );
+}
+
 
