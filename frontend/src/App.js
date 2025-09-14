@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import ChatWindow from "./components/ChatWindow";
 import Login from "./components/Login";
+import Sidebar from "./components/Sidebar";
 
 const socket = io("https://mirage-server-concordia.onrender.com"); // Render backend
 
@@ -13,9 +14,23 @@ export default function App() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Update message status function
+  const updateMessageStatus = (id, status) => {
+    setMessages(prev => {
+      const updated = { ...prev };
+      for (let u in updated) {
+        updated[u] = updated[u].map(m => (m.id === id ? { ...m, status } : m));
+      }
+      return updated;
+    });
+  };
+
+  // Socket listeners
   useEffect(() => {
-    socket.on("privateMessage", ({ from, message }) => {
-      setMessages((prev) => ({
+    if (!socket) return;
+
+    const handlePrivateMessage = ({ from, message }) => {
+      setMessages(prev => ({
         ...prev,
         [from]: [...(prev[from] || []), message],
       }));
@@ -27,42 +42,30 @@ export default function App() {
       }
 
       socket.emit("messageDelivered", { to: from, messageId: message.id });
-    });
+    };
 
-    socket.on("messageDelivered", ({ messageId }) => {
-      updateMessageStatus(messageId, "delivered");
-    });
+    const handleDelivered = ({ messageId }) => updateMessageStatus(messageId, "delivered");
+    const handleMarkRead = ({ ids }) => ids.forEach(id => updateMessageStatus(id, "read"));
 
-    socket.on("markRead", ({ ids }) => {
-      ids.forEach((id) => updateMessageStatus(id, "read"));
-    });
+    socket.on("privateMessage", handlePrivateMessage);
+    socket.on("messageDelivered", handleDelivered);
+    socket.on("markRead", handleMarkRead);
 
     return () => {
-      socket.off("privateMessage");
-      socket.off("messageDelivered");
-      socket.off("markRead");
+      socket.off("privateMessage", handlePrivateMessage);
+      socket.off("messageDelivered", handleDelivered);
+      socket.off("markRead", handleMarkRead);
     };
   }, []);
 
-  const updateMessageStatus = (id, status) => {
-    setMessages((prev) => {
-      const updated = { ...prev };
-      for (let user in updated) {
-        updated[user] = updated[user].map((m) =>
-          m.id === id ? { ...m, status } : m
-        );
-      }
-      return updated;
-    });
-  };
-
+  // Login handling
   const handleLogin = () => {
     setIsLoggedIn(true);
     if (Notification && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
-    // Register socket for this user
     socket.emit("registerSocket", username);
+    setUser({ username });
   };
 
   if (!isLoggedIn || !user) {
@@ -79,28 +82,17 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <div className="sidebar">
-        <h3>Contacts</h3>
-        <ul>
-          {contacts.map((u) => (
-            <li
-              key={u}
-              className={selectedUser === u ? "active" : ""}
-              onClick={() => {
-                setSelectedUser(u);
-                const unread = (messages[u] || [])
-                  .filter((m) => m.status !== "read")
-                  .map((m) => m.id);
-                if (unread.length) {
-                  socket.emit("markRead", { to: u, ids: unread });
-                }
-              }}
-            >
-              {u}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Sidebar
+        user={user}
+        contacts={contacts}
+        setContacts={setContacts}
+        selectedUser={selectedUser}
+        setSelectedUser={(u) => {
+          setSelectedUser(u);
+          const unread = (messages[u] || []).filter(m => m.status !== "read").map(m => m.id);
+          if (unread.length) socket.emit("markRead", { to: u, ids: unread });
+        }}
+      />
       <ChatWindow
         socket={socket}
         user={username}
