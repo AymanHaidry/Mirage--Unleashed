@@ -62,10 +62,31 @@ io.on("connection", (socket) => {
     }
   });
 
+  // send message
   socket.on("sendMessage", ({ from, to, text }) => {
     const recipient = users.find((u) => u.username === to);
+
+    // If recipient online, forward msg
     if (recipient?.socketId) {
-      io.to(recipient.socketId).emit("receiveMessage", { from, text, time: new Date() });
+      io.to(recipient.socketId).emit("receiveMessage", {
+        from,
+        text,
+        time: new Date(),
+      });
+
+      // Let sender know it's delivered
+      io.to(socket.id).emit("messageDelivered", { to, from, text });
+    } else {
+      // recipient offline → still confirm delivery to server
+      io.to(socket.id).emit("messageDelivered", { to, from, text });
+    }
+  });
+
+  // read receipt
+  socket.on("messageRead", ({ from, to, text }) => {
+    const sender = users.find((u) => u.username === from);
+    if (sender?.socketId) {
+      io.to(sender.socketId).emit("messageRead", { from: to, text });
     }
   });
 
@@ -80,8 +101,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀🚀 Backend running on port ${PORT}`));
-
-
-
-
+server.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
