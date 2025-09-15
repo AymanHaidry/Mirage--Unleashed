@@ -3,7 +3,8 @@ import io from "socket.io-client";
 import ChatWindow from "./components/ChatWindow";
 import Login from "./components/Login";
 import Sidebar from "./components/Sidebar";
-import "./App.css"; // 👈 add your global CSS here
+import "./styles/App.css";
+ // 👈 add your global CSS here
 
 const socket = io("https://mirage-server-concordia.onrender.com");
 
