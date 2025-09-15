@@ -344,4 +344,80 @@ body {
 }
 
 
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #efeae2;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  max-width: 70%;
+  padding: 8px 12px;
+  margin: 6px 0;
+  border-radius: 12px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.4;
+  display: inline-block;
+  word-wrap: break-word;
+}
+
+.message .time {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  text-align: right;
+  margin-top: 2px;
+}
+
+/* Sent messages (you) */
+.message.sent {
+  background-color: #d9fdd3;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+
+/* Received messages */
+.message.received {
+  background-color: #fff;
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+/* Input area */
+.chat-input {
+  display: flex;
+  padding: 10px;
+  background: #f0f0f0;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.chat-input button {
+  margin-left: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background: #128c7e;
+  color: white;
+  cursor: pointer;
+}
+
 
