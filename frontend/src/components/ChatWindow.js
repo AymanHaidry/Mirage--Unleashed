@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "./ui/button";
 
 function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, setMessages }) {
   const [input, setInput] = useState("");
@@ -120,6 +120,7 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
 }
 
 export default ChatWindow;
+
 
 
 
