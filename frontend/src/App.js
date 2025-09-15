@@ -157,8 +157,6 @@ function App() {
 }
 
 export default App;
-
-    </div>
   );
 }
 
