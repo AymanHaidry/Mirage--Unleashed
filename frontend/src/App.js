@@ -16,21 +16,34 @@ function App() {
     return savedContacts ? JSON.parse(savedContacts) : [];
   });
 
-  // Structure: { "Alice": [{sender, text, time}, ...], "Bob": [...] }
   const [messages, setMessages] = useState(() => {
     const savedMessages = localStorage.getItem("messages");
     return savedMessages ? JSON.parse(savedMessages) : {};
   });
 
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(
+    localStorage.getItem("selectedUser") || null
+  );
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Save user, contacts, messages to localStorage
-  useEffect(() => { if (user) localStorage.setItem("user", JSON.stringify(user)); }, [user]);
-  useEffect(() => localStorage.setItem("contacts", JSON.stringify(contacts)), [contacts]);
-  useEffect(() => localStorage.setItem("messages", JSON.stringify(messages)), [messages]);
+  // Persist state
+  useEffect(() => {
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+  }, [user]);
 
-  // Resize listener
+  useEffect(() => {
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+  }, [contacts]);
+
+  useEffect(() => {
+    localStorage.setItem("messages", JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
+    if (selectedUser) localStorage.setItem("selectedUser", selectedUser);
+  }, [selectedUser]);
+
+  // Handle resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
@@ -42,21 +55,35 @@ function App() {
     if (user) socket.emit("registerSocket", user.username);
   }, [user]);
 
-  // Listen for incoming messages
+  // Incoming messages
   useEffect(() => {
     if (!user) return;
 
-    socket.on("receiveMessage", ({ from, text }) => {
-      setMessages(prev => ({
-        ...prev,
-        [from]: [
-          ...(prev[from] || []),
-          { sender: from, text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-        ]
-      }));
-    });
+    const handleReceive = ({ from, text }) => {
+      setMessages(prev => {
+        const updated = {
+          ...prev,
+          [from]: [
+            ...(prev[from] || []),
+            {
+              sender: from,
+              text,
+              time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            },
+          ],
+        };
 
-    return () => socket.off("receiveMessage");
+        // immediately persist
+        localStorage.setItem("messages", JSON.stringify(updated));
+        return updated;
+      });
+    };
+
+    socket.on("receiveMessage", handleReceive);
+    return () => socket.off("receiveMessage", handleReceive);
   }, [user]);
 
   if (!user) return <Login setUser={setUser} setContacts={setContacts} />;
@@ -68,8 +95,8 @@ function App() {
           user={user}
           contacts={contacts}
           setContacts={setContacts}
-          setSelectedUser={setSelectedUser}
           selectedUser={selectedUser}
+          setSelectedUser={setSelectedUser}
         />
       )}
 
@@ -84,20 +111,29 @@ function App() {
           sendMessage={(text) => {
             if (!text.trim() || !selectedUser) return;
 
-            // Add locally
-            setMessages(prev => ({
-              ...prev,
-              [selectedUser]: [
-                ...(prev[selectedUser] || []),
-                { sender: "me", text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-              ]
-            }));
+            setMessages(prev => {
+              const updated = {
+                ...prev,
+                [selectedUser]: [
+                  ...(prev[selectedUser] || []),
+                  {
+                    sender: "me",
+                    text,
+                    time: new Date().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }),
+                  },
+                ],
+              };
+              localStorage.setItem("messages", JSON.stringify(updated));
+              return updated;
+            });
 
-            // Emit to server
             socket.emit("sendMessage", {
               to: selectedUser,
               from: user.username,
-              text
+              text,
             });
           }}
         />
@@ -107,4 +143,3 @@ function App() {
 }
 
 export default App;
-
