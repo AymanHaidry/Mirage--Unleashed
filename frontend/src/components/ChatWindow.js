@@ -1,54 +1,57 @@
-import React, { useState, useEffect, useRef } from "react";
-import "../styles/App.css";
+import React, { useState, useRef, useEffect } from "react";
 
-function ChatWindow({ selectedUser, messages, sendMessage, user }) {
-  const [newMsg, setNewMsg] = useState("");
+function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, sendMessage }) {
+  const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
+  // auto scroll down
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   const handleSend = () => {
-    if (!newMsg.trim()) return;
-    sendMessage(newMsg);
-    setNewMsg("");
+    if (!input.trim()) return;
+    sendMessage(input);
+    setInput("");
   };
 
-  if (!selectedUser) {
-    return <div className="empty-chat">Select a contact to start chatting</div>;
-  }
-
   return (
-    <div className="chat-window-container">
-      {/* Header */}
+    <div className="chat-window">
       <div className="chat-header">
-        <div className="chat-header-name">{selectedUser}</div>
-        <div className="chat-header-status">Online</div>
+        {isMobile && <button onClick={onBack}>⬅</button>}
+        <h2>{selectedUser}</h2>
       </div>
 
-      {/* Messages */}
       <div className="chat-messages">
-        {messages.map((msg, idx) => (
+        {messages.map((msg, i) => (
           <div
-            key={idx}
-            className={`bubble ${msg.sender === "me" ? "me" : "other"}`}
+            key={i}
+            className={`chat-message ${msg.sender === "me" ? "sent" : "received"}`}
           >
-            {msg.text}
-            <div className="timestamp">{msg.time}</div>
+            <span className="msg-text">{msg.text}</span>
+            <span className="msg-meta">
+              {msg.time}
+              {msg.sender === "me" && (
+                <span className={`tick ${msg.status}`}>
+                  {msg.status === "sent" && "✓"}
+                  {msg.status === "delivered" && "✓✓"}
+                  {msg.status === "read" && "✓✓"}
+                </span>
+              )}
+            </span>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className="chat-input">
         <input
-          type="text"
-          placeholder="Type a message..."
-          value={newMsg}
-          onChange={(e) => setNewMsg(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="Type a message..."
         />
         <button onClick={handleSend}>Send</button>
       </div>
@@ -57,4 +60,3 @@ function ChatWindow({ selectedUser, messages, sendMessage, user }) {
 }
 
 export default ChatWindow;
-
