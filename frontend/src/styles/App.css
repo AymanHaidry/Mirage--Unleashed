@@ -335,5 +335,13 @@ body {
 }
 
 
+.tick {
+  margin-left: 6px;
+  font-size: 12px;
+}
+.tick.read {
+  color: blue;
+}
+
 
 
