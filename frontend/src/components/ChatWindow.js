@@ -1,20 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
 
-function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, sendMessage }) {
+function ChatWindow({ user, selectedUser, onBack, isMobile, messages, sendMessage }) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
-  // auto scroll to bottom
+  // Auto scroll when new msg comes
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
+  // Send handler
   const handleSend = () => {
     if (!input.trim()) return;
-    sendMessage(input);
-    setInput("");
+    sendMessage(input);   // backend/socket call
+    setInput("");         // clear textbox
   };
 
   return (
@@ -30,13 +31,20 @@ function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, se
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`message-bubble ${msg.sender === "me" ? "sent" : "received"}`}
+            className={`message-bubble ${msg.sender === user ? "sent" : "received"}`}
           >
+            {/* Main text */}
             <div className="text">{msg.text}</div>
+
+            {/* Time + ticks */}
             <div className="meta">
               <span className="time">{msg.time}</span>
-              {msg.sender === "me" && (
-                <span className={`tick ${msg.status}`}>✓✓</span>
+              {msg.sender === user && (
+                <span className={`tick ${msg.status}`}>
+                  {msg.status === "sent" && "✓"}
+                  {msg.status === "delivered" && "✓✓"}
+                  {msg.status === "read" && "✓✓"}
+                </span>
               )}
             </div>
           </div>
