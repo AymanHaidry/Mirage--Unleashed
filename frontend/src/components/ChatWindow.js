@@ -4,6 +4,7 @@ function ChatWindow({ user, selectedUser, onBack, isMobile, messages, sendMessag
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
+  // auto-scroll
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -16,13 +17,24 @@ function ChatWindow({ user, selectedUser, onBack, isMobile, messages, sendMessag
     setInput("");
   };
 
+  // If no user is selected → show placeholder
+  if (!selectedUser) {
+    return (
+      <div className="chat-window empty-chat">
+        <p>Select a user to start chatting 💬</p>
+      </div>
+    );
+  }
+
   return (
     <div className="chat-window">
+      {/* Header */}
       <div className="chat-header">
         {isMobile && <button onClick={onBack}>←</button>}
         <h3>{selectedUser}</h3>
       </div>
 
+      {/* Messages */}
       <div className="chat-messages">
         {messages.map((msg, idx) => (
           <div
@@ -45,6 +57,7 @@ function ChatWindow({ user, selectedUser, onBack, isMobile, messages, sendMessag
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input */}
       <div className="chat-input">
         <input
           type="text"
