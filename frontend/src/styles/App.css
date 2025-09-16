@@ -816,6 +816,12 @@ body {
   border-bottom: 0 solid transparent;
 }
 
+.chat-window {
+  flex: 1;              /* take full remaining width */
+  display: flex;
+  flex-direction: column;
+}
+
 
 
 
