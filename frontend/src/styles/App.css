@@ -504,6 +504,32 @@ body {
   border-radius: 20px;
   cursor: pointer;
 }
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #efeae2;
+  margin: 0 auto;         /* center on desktop */
+  max-width: 900px;       /* like WhatsApp Web */
+  width: 100%;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+/* Message ticks */
+.tick {
+  font-size: 12px;
+  margin-left: 4px;
+  color: gray;
+}
+
+.tick.delivered {
+  color: gray; /* double gray ticks */
+}
+
+.tick.read {
+  color: #34b7f1; /* blue ticks */
+}
+
 
 
 
