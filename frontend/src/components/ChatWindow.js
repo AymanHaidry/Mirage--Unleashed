@@ -4,42 +4,35 @@ function ChatWindow({ user, selectedUser, onBack, isMobile, messages, sendMessag
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
-  // Auto scroll when new msg comes
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // Send handler
   const handleSend = () => {
     if (!input.trim()) return;
-    sendMessage(input);   // backend/socket call
-    setInput("");         // clear textbox
+    sendMessage(input);
+    setInput("");
   };
 
   return (
     <div className="chat-window">
-      {/* Header */}
       <div className="chat-header">
         {isMobile && <button onClick={onBack}>←</button>}
         <h3>{selectedUser}</h3>
       </div>
 
-      {/* Messages */}
       <div className="chat-messages">
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`message-bubble ${msg.sender === user ? "sent" : "received"}`}
+            className={`message-bubble ${msg.isOwn ? "sent" : "received"}`}
           >
-            {/* Main text */}
             <div className="text">{msg.text}</div>
-
-            {/* Time + ticks */}
             <div className="meta">
               <span className="time">{msg.time}</span>
-              {msg.sender === user && (
+              {msg.isOwn && (
                 <span className={`tick ${msg.status}`}>
                   {msg.status === "sent" && "✓"}
                   {msg.status === "delivered" && "✓✓"}
@@ -52,7 +45,6 @@ function ChatWindow({ user, selectedUser, onBack, isMobile, messages, sendMessag
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className="chat-input">
         <input
           type="text"
