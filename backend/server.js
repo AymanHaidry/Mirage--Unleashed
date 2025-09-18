@@ -9,6 +9,9 @@ app.use(express.json());
 
 let users = []; // { username, password, socketId, contacts: [] }
 
+// =================== AUTH & CONTACT ROUTES ===================
+
+// Register new user
 app.post("/register", (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -23,15 +26,19 @@ app.post("/register", (req, res) => {
   return res.json({ success: true });
 });
 
+// Login
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-  const user = users.find((u) => u.username === username && u.password === password);
+  const user = users.find(
+    (u) => u.username === username && u.password === password
+  );
   if (!user) {
     return res.status(400).json({ error: "Invalid username or password" });
   }
   res.json({ success: true, contacts: user.contacts });
 });
 
+// Add contact
 app.post("/addContact", (req, res) => {
   const { owner, contact } = req.body;
   const ownerUser = users.find((u) => u.username === owner);
@@ -48,6 +55,8 @@ app.post("/addContact", (req, res) => {
   return res.json({ success: true, contacts: ownerUser.contacts });
 });
 
+// =================== SOCKET.IO ===================
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
@@ -62,7 +71,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  // send message
+  // Send message
   socket.on("sendMessage", ({ from, to, text }) => {
     const recipient = users.find((u) => u.username === to);
 
@@ -82,7 +91,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  // read receipt
+  // Read receipt
   socket.on("messageRead", ({ from, to, text }) => {
     const sender = users.find((u) => u.username === from);
     if (sender?.socketId) {
@@ -100,7 +109,8 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// =================== KEEP-ALIVE ROUTES ===================
+
 app.get("/", (req, res) => {
   res.send("Backend is alive 🚀");
 });
@@ -109,5 +119,10 @@ app.get("/ping", (req, res) => {
   res.send("pong");
 });
 
-server.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
+// =================== START SERVER ===================
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () =>
+  console.log(`🚀 Backend running on port ${PORT}`)
+);
 
