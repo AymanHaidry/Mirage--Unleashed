@@ -101,4 +101,13 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
+app.get("/", (req, res) => {
+  res.send("Backend is alive 🚀");
+});
+
+app.get("/ping", (req, res) => {
+  res.send("pong");
+});
+
 server.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
+
