@@ -6,94 +6,38 @@ import ChatWindow from "./components/ChatWindow";
 import "./styles/App.css";
 
 function App() {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-
-  const [contacts, setContacts] = useState(() => {
-    const savedContacts = localStorage.getItem("contacts");
-    return savedContacts ? JSON.parse(savedContacts) : [];
-  });
-
-  const [messages, setMessages] = useState(() => {
-    const savedMessages = localStorage.getItem("messages");
-    return savedMessages ? JSON.parse(savedMessages) : {};
-  });
-
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null);
+  const [contacts, setContacts] = useState(() => JSON.parse(localStorage.getItem("contacts")) || []);
+  const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem("messages")) || {});
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // persist
-  useEffect(() => { if (user) localStorage.setItem("user", JSON.stringify(user)); }, [user]);
-  useEffect(() => { localStorage.setItem("contacts", JSON.stringify(contacts)); }, [contacts]);
-  useEffect(() => { localStorage.setItem("messages", JSON.stringify(messages)); }, [messages]);
-
-  // resize
+  // Persistence Sync
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+    localStorage.setItem("messages", JSON.stringify(messages));
+  }, [user, contacts, messages]);
 
-  // register user with socket
-  useEffect(() => {
-    if (user) socket.emit("registerSocket", user.username);
-  }, [user]);
-
-  // listen for events
+  // Socket Registration & Listeners
   useEffect(() => {
     if (!user) return;
+    socket.emit("registerSocket", user.username);
 
-    // incoming msg
     socket.on("receiveMessage", ({ from, text }) => {
-      setMessages(prev => {
-        const updated = {
-          ...prev,
-          [from]: [
-            ...(prev[from] || []),
-            {
-              sender: from,
-              text,
-              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              status: "delivered" // recipient side
-            }
-          ]
-        };
-        localStorage.setItem("messages", JSON.stringify(updated));
-        return updated;
-      });
-
-      // auto mark as read if currently viewing that chat
-      if (selectedUser === from) {
-        socket.emit("messageRead", { from, to: user.username, text });
-      }
+      setMessages(prev => ({
+        ...prev,
+        [from]: [...(prev[from] || []), { sender: from, text, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), status: "delivered" }]
+      }));
+      if (selectedUser === from) socket.emit("messageRead", { from, to: user.username, text });
     });
 
-    // delivery receipts
-    socket.on("messageDelivered", ({ to, from, text }) => {
-      setMessages(prev => {
-        const updated = { ...prev };
-        if (updated[to]) {
-          const idx = updated[to].findIndex(m => m.text === text && m.sender === "me");
-          if (idx !== -1) updated[to][idx].status = "delivered";
-        }
-        localStorage.setItem("messages", JSON.stringify(updated));
-        return updated;
-      });
+    socket.on("messageDelivered", ({ to, text }) => {
+      updateStatus(to, text, "delivered");
     });
 
-    // read receipts
     socket.on("messageRead", ({ from, text }) => {
-      setMessages(prev => {
-        const updated = { ...prev };
-        if (updated[from]) {
-          const idx = updated[from].findIndex(m => m.text === text && m.sender === "me");
-          if (idx !== -1) updated[from][idx].status = "read";
-        }
-        localStorage.setItem("messages", JSON.stringify(updated));
-        return updated;
-      });
+      updateStatus(from, text, "read");
     });
 
     return () => {
@@ -103,53 +47,33 @@ function App() {
     };
   }, [user, selectedUser]);
 
+  const updateStatus = (contact, text, status) => {
+    setMessages(prev => {
+      const updated = { ...prev };
+      if (updated[contact]) {
+        const idx = updated[contact].findLastIndex(m => m.text === text && m.sender === "me");
+        if (idx !== -1) updated[contact][idx].status = status;
+      }
+      return { ...updated };
+    });
+  };
+
   if (!user) return <Login setUser={setUser} setContacts={setContacts} />;
 
   return (
-    <div className="app-container">
+    <div className="app-container glass-theme">
       {(!isMobile || !selectedUser) && (
-        <Sidebar
-          user={user}
-          contacts={contacts}
-          setContacts={setContacts}
-          setSelectedUser={setSelectedUser}
-          selectedUser={selectedUser}
-        />
+        <Sidebar user={user} contacts={contacts} setContacts={setContacts} setSelectedUser={setSelectedUser} selectedUser={selectedUser} />
       )}
-
       {(!isMobile || selectedUser) && (
-        <ChatWindow
-          socket={socket}
-          user={user}
-          selectedUser={selectedUser}
-          onBack={() => setSelectedUser(null)}
-          isMobile={isMobile}
-          messages={messages[selectedUser] || []}
-          sendMessage={(text) => {
-            if (!text.trim() || !selectedUser) return;
-
-            const newMessage = {
-              sender: "me",
-              text,
-              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              status: "sent"
-            };
-
-            setMessages(prev => {
-              const updated = {
-                ...prev,
-                [selectedUser]: [...(prev[selectedUser] || []), newMessage],
-              };
-              localStorage.setItem("messages", JSON.stringify(updated));
-              return updated;
-            });
-
-            socket.emit("sendMessage", {
-              to: selectedUser,
-              from: user.username,
-              text
-            });
-          }}
+        <ChatWindow 
+            socket={socket} 
+            user={user} 
+            selectedUser={selectedUser} 
+            onBack={() => setSelectedUser(null)} 
+            isMobile={isMobile} 
+            messages={messages[selectedUser] || []} 
+            setMessages={setMessages}
         />
       )}
     </div>
