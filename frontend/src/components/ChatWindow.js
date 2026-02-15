@@ -1,107 +1,74 @@
 import React, { useState, useRef, useEffect } from "react";
-import Message from "./Message";
 import Picker from "emoji-picker-react";
 
-function ChatWindow({
-  socket,
-  user,
-  selectedUser,
-  onBack,
-  isMobile,
-  messages,
-  sendMessage,
-}) {
+function ChatWindow({ socket, user, selectedUser, onBack, isMobile, messages, setMessages }) {
   const [input, setInput] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
-
   const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
 
-  // Auto-scroll on new messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !selectedUser) return;
 
-    sendMessage({ text: input });
+    const newMessage = {
+      sender: "me",
+      text: input,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      status: "sent"
+    };
+
+    setMessages(prev => ({
+      ...prev,
+      [selectedUser]: [...(prev[selectedUser] || []), newMessage]
+    }));
+
+    socket.emit("sendMessage", { to: selectedUser, from: user.username, text: input });
     setInput("");
     setShowEmoji(false);
-
-    // keep focus for fast typing
-    inputRef.current?.focus();
-  };
-
-  const onEmojiClick = (emojiData) => {
-    setInput((prev) => prev + emojiData.emoji);
-    inputRef.current?.focus(); // CRITICAL: restore focus
   };
 
   return (
     <div className="chat-window">
-      {/* HEADER */}
       <div className="chat-header">
-        {isMobile && <button onClick={onBack}>←</button>}
-        <h3>{selectedUser || "Select a chat"}</h3>
+        {isMobile && <button className="back-btn" onClick={onBack}>←</button>}
+        <div className="header-info">
+          <h3>{selectedUser || "IDLE_CHANNEL"}</h3>
+          <span className="status-dot"></span>
+        </div>
       </div>
 
-      {/* MESSAGES */}
       <div className="chat-messages">
-        {messages.length === 0 && (
-          <div className="empty-chat">
-            No messages yet — say hello 👋
+        {messages.map((msg, i) => (
+          <div key={i} className={`message-wrapper ${msg.sender === "me" ? "sent" : "received"}`}>
+            <div className="message-bubble">
+              <p>{msg.text}</p>
+              <div className="message-meta">
+                <span>{msg.time}</span>
+                {msg.sender === "me" && (
+                  <span className={`status-icon ${msg.status}`}>
+                    {msg.status === "read" ? "✓✓" : "✓"}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-
-        {messages.map((msg) => (
-          <Message
-            key={msg.id || msg.timestamp || Math.random()}
-            msg={msg}
-          />
         ))}
-
         <div ref={messagesEndRef} />
       </div>
 
-      {/* INPUT */}
-      <div className="chat-input">
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          className="chat-textbox"
-          placeholder="Type a message..."
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
+      <div className="chat-input-area">
+        <button onClick={() => setShowEmoji(!showEmoji)} className="emoji-trigger">☺</button>
+        <input 
+            type="text" 
+            value={input} 
+            placeholder="ENCRYPTING MESSAGE..." 
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
-
-        <button
-          className="icon-btn"
-          onClick={() => {
-            setShowEmoji((s) => !s);
-            inputRef.current?.focus();
-          }}
-        >
-          😊
-        </button>
-
-        <button className="chat-send" onClick={handleSend}>
-          Send
-        </button>
+        <button className="send-btn" onClick={handleSend}>TRANSMIT</button>
+        {showEmoji && <div className="emoji-popover"><Picker onEmojiClick={(d) => setInput(prev => prev + d.emoji)} /></div>}
       </div>
-
-      {/* EMOJI PICKER */}
-      {showEmoji && (
-        <div className="emoji-picker">
-          <Picker onEmojiClick={onEmojiClick} />
-        </div>
-      )}
     </div>
   );
 }
